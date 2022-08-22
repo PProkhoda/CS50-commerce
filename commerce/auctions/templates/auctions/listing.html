@@ -1,0 +1,95 @@
+{% extends "auctions/layout.html" %}
+
+
+{% block body %}
+    {% if listing.status is False%}
+    <div class="alert alert-danger" role="alert">
+        <h2>listing closed</h2>
+        <p>Auction winner: {{ listing.buyer }}</p>
+    </div>
+    {% endif %}
+
+
+<div>
+    {% if user.is_authenticated %}
+        {% if listingWatchlist %}
+            <form action="{% url 'removeWatchlist' id=listing.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-light">Remove from Watchlist</button>
+            </form>
+        {% else %}
+            <form action="{% url 'addWatchlist' id=listing.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-dark">Add to Watchlist</button>
+            </form>
+        {% endif %}
+    {% endif %}
+</div>
+    <h3>listing: {{ listing.title }} </h3>
+    <img src="{{listing.image_url}}" alt="{{listing.title}}" height="300">
+    <!-- <p>Description: {{ listing.description }}</p> -->
+    <form>
+        <div class="form-group">
+            <label for="exampleFormControlTextarea1">Description:</label>
+            <textarea class="form-control col-md-8 col-lg-8" id="exampleFormControlTextarea1" rows="3">{{ listing.description }}</textarea>
+        </div>
+    </form>
+    <p>Seller: {{ listing.creator }}</p>
+    <p>Date of creation: {{ listing.created_date }}</p>
+    <!-- <p>start bid: {{ listing.start_bid }}</p> -->
+    {% if listing.current_bid %}
+        <p>current price: ${{ listing.current_bid }}</p>
+    {% else %}
+        <p>current price: ${{ listing.start_bid }}</p>
+    {% endif %}
+    
+    {% if user.is_authenticated %}
+        {% if listing.buyer is None %}
+            <form action="{% url 'bids' id=listing.id %}" method="post">
+                {% csrf_token %}
+                {{ bidform }}
+                <button type="submit" class="btn btn-secondary">Submit</button>
+            
+            </form>
+            {% if chekbid is True %}
+            <div class="alert alert-danger col-md-8 col-lg-8" role="alert">
+                <h2>Please enter a valid value. The current bid must be greater than the current price.</h2>
+            </div>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    
+    <h4>Comments:</h4>
+    <ul>
+    {% for comment in comments %}
+        <li>{{ comment }}</li>
+    {% endfor %}
+    </ul>
+
+<div> 
+    {% if user.is_authenticated %}
+        {% if listing.buyer is None %}
+            <form action="{% url 'comments' id=listing.id %}" method="post">
+                {% csrf_token %}
+
+                {{ commentform }}
+                <button type="submit" class="btn btn-secondary">Submit</button>
+
+            </form>
+        {% endif %}
+    {% endif %}
+</div>
+<div>
+    {% if user.is_authenticated %}
+        {% if user == listing.creator %}
+            {% if listing.status %}
+                <form action="{% url 'closeListing' id=listing.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Close Listing</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+</div>
+
+{% endblock %}

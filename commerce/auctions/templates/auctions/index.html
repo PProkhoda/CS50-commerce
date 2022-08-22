@@ -1,0 +1,47 @@
+{% extends "auctions/layout.html" %}
+
+
+{% block body %}
+  <nav class="navbar navbar-light bg-dark">
+    <h3 style="color: white;">Categories:</h3>
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'index' %}">All Categories</a>
+    <form class="form-inline" action="{% url 'cat' %}" method="POST">
+      {% csrf_token %}
+  
+      {% for cat in categories %}
+        <button class="btn btn-sm btn-outline-secondary" type="submit" name="category" value="{{ cat }}">{{ cat }}</button>
+      {% endfor %}
+    </form>
+  </nav>
+
+  <main class="content-wrapper">
+    <div class="container-fluid">
+      <h3>Active Listings</h3>
+      <div class="container">
+          <div class="row row-cols-3">
+            {% for p in posts %}
+            <div class="col">
+              <div class="container">
+                  <div class="card" style="width: auto;">
+                      <img src="{{p.image_url}}" class="card-img-top" alt="{{p.title}}">
+                      <div class="card-body">
+                        <h5 class="card-title">{{p.title}}</h5>
+                        <p class="card-text">{{p.description}}</p>
+                        {% if p.current_bid is None %}
+                          <h6 class="card-title">Current price: ${{p.start_bid}}</h6>
+                        {% else  %}
+                          <h6 class="card-title">Current price: ${{p.current_bid}}</h6>
+                        {% endif %}
+                        <a href="{% url 'listing' id=p.id %}" class="btn btn-primary">See LIsting</a>
+                      </div>
+                    </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          
+      </div>
+    </div>
+  </main>
+
+{% endblock %}
